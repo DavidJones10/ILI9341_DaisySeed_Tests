@@ -1,6 +1,6 @@
-# ILI9341 driver for ElectroSmith Daisy Seed platform
+# ILI9341 Tests on the Daisy Seed using the driver written by brbrr in this repo: [ili9341_daisy](https://github.com/brbrr/ili9341_daisy/tree/main)
 
-## Overview
+## Overview copied from brbrr's repo
 
 - In current state, it is capable producing solid 40 FPS.
 - Uses DMA for SPI communication.
