@@ -1,0 +1,24 @@
+# Ignore build output
+/build/
+
+# Common compiled/binary artifacts
+*.bin
+*.elf
+*.hex
+*.o
+*.d
+*.lst
+*.map
+*.axf
+
+# Misc
+*.log
+*.tmp
+*~
+.DS_Store
+Thumbs.db
+
+# Ignore IDE/project files
+.vscode/
+.idea/
+
