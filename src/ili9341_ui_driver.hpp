@@ -375,17 +375,25 @@ class ILI9341UiDriver : public _UiDriver
         FillCircle(x + w - r - 1, y + h - r - 1, r, color);
     }
 
-    void DrawRoundedTextRect(char* text, 
+    void DrawRoundedTextRect(const char* text, 
                              uint16_t x, 
                              uint16_t y, 
                              uint16_t w, 
                              uint16_t h, 
                              uint16_t r, 
                              uint8_t borderColor,
-                             uint8_t fillColor)
+                             uint8_t fillColor,
+                             uint8_t textColor,
+                             FontDef font)
     {
-        DrawRoundedRectangle(x, y, w, h, r, borderColor);
         FillRoundedRectangle(x, y, w, h, r, fillColor);
+        // Calculate text width and height
+        uint16_t text_width = GetStringWidth(text, font);
+        uint16_t text_height = font.FontHeight;
+        // Center text
+        uint16_t text_x = x + (w - text_width) / 2;
+        uint16_t text_y = y + (h - text_height) / 2;
+        WriteString(text, text_x, text_y, font, textColor);
     }
 
     void Update() override

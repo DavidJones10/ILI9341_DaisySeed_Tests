@@ -1,5 +1,6 @@
 #include "daisy_seed.h"
 #include "src/ili9341_ui_driver.hpp"
+#include "src/menu.hpp"
 #include "daisysp.h"
 using namespace daisy;
 using namespace daisysp;
@@ -10,10 +11,6 @@ Oscillator lfo;
 Random rdm;
 Switch sw;
 Led led;
-
-#define MAX_X 320
-#define MAX_Y 240
-#define MIN_XY 0
 
 float lfo_out;
 int xPos = 50; int yPos = 50; int moverWidth = 50;
@@ -50,13 +47,13 @@ void draw() {
         yPos = 0;
         yVelo *= -1;
     }
-    driver.DrawRect(Rectangle(xPos, yPos, 50, 50), COLOR_RED);
-    driver.FillRect(Rectangle(xPos, yPos, 50, 50), COLOR_RED);
-    driver.DrawRoundedRectangle(100, 100, 100, 50, 10, COLOR_WHITE);
-    driver.FillRoundedRectangle(100, 100, 100, 50, 10, buttonColor);
+    //driver.FillRect(Rectangle(xPos, yPos, 50, 50), COLOR_RED);
+    //driver.FillRoundedRectangle(100, 100, 100, 50, 10, buttonColor);
+    driver.DrawRoundedTextRect("Delay", 10, 10, 150, 30, 5, COLOR_WHITE, COLOR_CYAN, COLOR_BLACK, Font_16x26);
     sprintf(strbuff, "LFO: %.2f Hz", lfoFreqs[lfoFreqIdx]);
-    driver.WriteString(strbuff, 10, 10, Font_11x18, COLOR_WHITE);
-    
+    driver.DrawLine(0, 50, 320, 50, COLOR_WHITE);
+    driver.WriteStringAligned("lol", Font_16x26, Rectangle(200, 30, 50, 50), Alignment::centered, COLOR_WHITE);
+    driver.WriteString(strbuff, 200, 48, Font_7x10, COLOR_WHITE);
 }
 
 void randomizeValues() {
