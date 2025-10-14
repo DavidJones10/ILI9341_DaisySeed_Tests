@@ -281,6 +281,7 @@ class ILI9341UiDriver : public _UiDriver
 
     void FillCircle(int16_t x0, int16_t y0, int16_t r, uint8_t color)
     {
+        DrawLine(x0, y0-r, x0, y0 + r + 1, color);
         FillCircleHelper(x0, y0, r, 3, 0, color);
     }
 
@@ -369,10 +370,10 @@ class ILI9341UiDriver : public _UiDriver
         dma2d_.FillRect(Rectangle(x + r, y, w - 2*r, h), color, alpha); // Center rectangle
         dma2d_.FillRect(Rectangle(x, y + r, r, h - 2*r), color, alpha); // Left rectangle
         dma2d_.FillRect(Rectangle(x + w - r - 1, y + r, r, h - 2*r), color, alpha); // Right rectangle
-        FillCircle(x + r, y + r, r, color);
-        FillCircle(x + w - r - 1, y + r, r, color);
-        FillCircle(x + r, y + h - r - 1, r, color);
-        FillCircle(x + w - r - 1, y + h - r - 1, r, color);
+        FillCircle(x + r, y + r, r, color); // Top Left
+        FillCircle(x + w - r - 2, y + r, r, color); // Top Right
+        FillCircle(x + r, y + h - r - 2, r, color); // Bottom Left
+        FillCircle(x + w - r - 2, y + h - r - 2, r, color); // Bottom Right
     }
 
     void DrawRoundedTextRect(const char* text, 
@@ -385,7 +386,7 @@ class ILI9341UiDriver : public _UiDriver
                              uint8_t fillColor,
                              uint8_t textColor,
                              FontDef font)
-    {
+    {   
         FillRoundedRectangle(x, y, w, h, r, fillColor);
         // Calculate text width and height
         uint16_t text_width = GetStringWidth(text, font);
@@ -441,12 +442,9 @@ class ILI9341UiDriver : public _UiDriver
 
         auto id = 2 * (x + y * width);
 
-        // NOTE: Probably we should check the color id before accessing the array
-        transport_.PaintPixel(id, color, alpha);
-
-        // Lets divide the whole screen in 10 sectors, 32 pixel high each
-        // uint8_t screen_sector     = y / 32;
-        // dirty_buff[screen_sector] = 1;
+        // NOTE: Confirm support for other colors before changing this
+        if (color < NUMBER_OF_TFT_COLORS)
+            dma2d_.FillRect(Rectangle(x, y, 1, 1), color, alpha);
     }
 
     enum class Quadrant {
@@ -754,6 +752,7 @@ class ILI9341UiDriver : public _UiDriver
 
     char WriteChar(char ch, FontDef font, uint8_t color)
     {
+        uint32_t i, b, j;
         // Check if character is valid
         if(ch < 32 || ch > 126)
             return 0;
@@ -765,19 +764,20 @@ class ILI9341UiDriver : public _UiDriver
         }
 
         // Use the font to write
-        for(auto i = 0; i < font.FontHeight; i++)
+        for(i = 0; i < font.FontHeight; i++)
         {
-            auto b = font.data[(ch - 32) * font.FontHeight + i];
-            for(auto j = 0; j < font.FontWidth; j++)
+            b = font.data[(ch - 32) * font.FontHeight + i];
+            for(j = 0; j < font.FontWidth; j++)
             {
                 if((b << j) & 0x8000)
                 {
-                    DrawPixel(currentX_ + j, (currentY_ + i), color);
+                    DrawPixel(currentX_ + j, (currentY_ + i), color, 255U);
+                    //DrawLine(currentX_ + j, (currentY_ + i), currentX_ + j, (currentY_ + i), color);
                 }
             }
         }
 
-        // dma2d_.WriteChar(ch, currentX_, currentY_, font, color);
+        //dma2d_.WriteChar(ch, currentX_, currentY_, font, color);
 
         // The current space is now taken
         SetCursor(currentX_ + font.FontWidth, currentY_);

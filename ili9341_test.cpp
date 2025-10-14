@@ -47,13 +47,15 @@ void draw() {
         yPos = 0;
         yVelo *= -1;
     }
-    //driver.FillRect(Rectangle(xPos, yPos, 50, 50), COLOR_RED);
-    //driver.FillRoundedRectangle(100, 100, 100, 50, 10, buttonColor);
+    driver.FillRect(Rectangle(xPos, yPos, 50, 50), COLOR_RED);
+    driver.FillRoundedRectangle(100, 100, 100, 50, 10, buttonColor);
     driver.DrawRoundedTextRect("Delay", 10, 10, 150, 30, 5, COLOR_WHITE, COLOR_CYAN, COLOR_BLACK, Font_16x26);
-    sprintf(strbuff, "LFO: %.2f Hz", lfoFreqs[lfoFreqIdx]);
+    sprintf(strbuff, "LFO: %.2f Hz", lfo_out);
     driver.DrawLine(0, 50, 320, 50, COLOR_WHITE);
     driver.WriteStringAligned("lol", Font_16x26, Rectangle(200, 30, 50, 50), Alignment::centered, COLOR_WHITE);
-    driver.WriteString(strbuff, 200, 48, Font_7x10, COLOR_WHITE);
+    driver.WriteString(strbuff, 100, 20, Font_7x10, COLOR_WHITE);
+    driver.WriteString("Underlined", 20, 100, Font_16x26, COLOR_RED);
+    driver.FillCircle(100, 200, 30, COLOR_WHITE);
 }
 
 void randomizeValues() {
@@ -86,10 +88,7 @@ int main(void)
     lfo.SetAmp(1.0f);
 
     // Here all the drawing happening in the memory buffer, so no drawing happening at this point.
-    driver.Fill(COLOR_BLACK);
-    driver.FillRect(Rectangle(100, 100, 50, 50), COLOR_RED);
-    driver.DrawRect(Rectangle(100, 100, 50, 50), COLOR_WHITE);
-
+    //driver.Fill(COLOR_BLACK);
     randomizeValues();
 
     hw.StartAudio(AudioCallback);
