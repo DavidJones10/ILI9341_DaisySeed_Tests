@@ -100,7 +100,7 @@ public:
     void DecrementMenuCursor(){
         size_t newCursorId = menuCursorIdx - 1;
         if (wrapIncDec) {
-            menuCursorIdx = (newCursorId < 0) ? menuItems.size() - 1 : newCursorId;
+            menuCursorIdx = (newCursorId < 0) ? menuItems.size() - 2 : newCursorId;
         } else {
             menuCursorIdx = (newCursorId < 0) ? 0 : newCursorId;
         }

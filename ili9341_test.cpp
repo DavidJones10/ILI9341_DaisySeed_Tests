@@ -10,8 +10,8 @@ DaisySeed  hw;
 Oscillator lfo;
 Random rdm;
 Switch sw;
-Switch sw2;
 Led led;
+Encoder enc;
 Menu menu;
 
 float lfo_out;
@@ -48,7 +48,7 @@ int main(void)
     hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
     driver.Init();
     sw.Init(hw.GetPin(30), 1000);
-    sw2.Init(hw.GetPin(27), 1000.f);
+    enc.Init(hw.GetPin(6), hw.GetPin(5), hw.GetPin(27), 1000.f);
     led.Init(hw.GetPin(28), false, 1000.f);
 
     lfo.Init(hw.AudioSampleRate());
@@ -69,7 +69,7 @@ int main(void)
     for(;;)
     {
         sw.Debounce();
-        sw2.Debounce();
+        enc.Debounce();
         // IsRender() checks if DMA is idle (i.e. done transmitting the buffer), Update() initiates the DMA transfer
         if(driver.IsRender())
         {   
@@ -78,17 +78,23 @@ int main(void)
         }
 
         if (sw.RisingEdge()) {
-            myLedVal = !myLedVal;
             lfoFreqIdx = (lfoFreqIdx + 1) % 7;
             lfo.SetFreq(lfoFreqs[lfoFreqIdx]);
             menu.IncrementMenuCursor();
         }
-        if (sw2.RisingEdge()) {
-            if (menu.IsMenuItemSelected()) {
-                menu.ReturnToMenuScreen();
-            } else {
+        if (enc.Increment() > 0) {
+            menu.DecrementMenuCursor();
+        }
+        if (enc.Increment() < 0) {
+            menu.IncrementMenuCursor();
+        }
+        if (enc.RisingEdge()) {
+            if (!menu.IsMenuItemSelected()) {
                 menu.SelectCurrentMenuItem();
-            }
+            } 
+        }
+        if (enc.TimeHeldMs() > 2000.f) {
+            menu.ReturnToMenuScreen();
         }
         if (myLedVal) {
             hw.SetLed(true);
