@@ -10,7 +10,9 @@ DaisySeed  hw;
 Oscillator lfo;
 Random rdm;
 Switch sw;
+Switch sw2;
 Led led;
+Menu menu;
 
 float lfo_out;
 int xPos = 50; int yPos = 50; int moverWidth = 50;
@@ -29,48 +31,14 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 
 void draw() {
     driver.Fill(COLOR_BLACK);
-    xPos += xVelo;
-    yPos += yVelo;
-    if (xPos + moverWidth > MAX_X) {
-        xPos = MAX_X - moverWidth;
-        xVelo *= -1;
-    }
-    if (xPos < MIN_XY) {
-        xPos = 0;
-        xVelo *= -1;
-    }
-    if (yPos + moverWidth > MAX_Y) {
-        yPos = MAX_Y - moverWidth;
-        yVelo *= -1;
-    }
-    if (yPos < MIN_XY) {
-        yPos = 0;
-        yVelo *= -1;
-    }
-    driver.FillRect(Rectangle(xPos, yPos, 50, 50), COLOR_RED);
-    driver.FillRoundedRectangle(100, 100, 100, 50, 10, buttonColor);
-    driver.DrawRoundedTextRect("Delay", 10, 10, 150, 30, 5, COLOR_WHITE, COLOR_CYAN, COLOR_BLACK, Font_16x26);
-    sprintf(strbuff, "LFO: %.2f Hz", lfo_out);
-    driver.DrawLine(0, 50, 320, 50, COLOR_WHITE);
-    driver.WriteStringAligned("lol", Font_16x26, Rectangle(200, 30, 50, 50), Alignment::centered, COLOR_WHITE);
-    driver.WriteString(strbuff, 100, 20, Font_7x10, COLOR_WHITE);
-    driver.WriteString("Underlined", 20, 100, Font_16x26, COLOR_RED);
-    driver.FillCircle(100, 200, 30, COLOR_WHITE);
+    menu.Draw();
 }
 
-void randomizeValues() {
-    if (rdm.IsReady()) {
-        xPos = int(rdm.GetFloat(0.f, MAX_X - moverWidth));
-        yPos = int(rdm.GetFloat(0.f, MAX_Y - moverWidth));
-        float negx = rdm.GetFloat(0.f, 2.f);
-        if (negx > 1.f) {
-            xVelo *= -1;
-        }
-        float neg = rdm.GetFloat(0.f, 2.f);
-        if (neg > 1.f) {
-            yVelo *= -1;
-        }
-    }
+
+void GeneralSubmenuCallback() {
+    driver.DrawCircle(50, 50, 10, COLOR_BLUE);
+    driver.DrawCircle(80, 50, 10, COLOR_RED);
+    driver.DrawCircle(50, 80, 10, COLOR_WHITE);
 }
 
 int main(void)
@@ -80,6 +48,7 @@ int main(void)
     hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
     driver.Init();
     sw.Init(hw.GetPin(30), 1000);
+    sw2.Init(hw.GetPin(27), 1000.f);
     led.Init(hw.GetPin(28), false, 1000.f);
 
     lfo.Init(hw.AudioSampleRate());
@@ -89,13 +58,18 @@ int main(void)
 
     // Here all the drawing happening in the memory buffer, so no drawing happening at this point.
     //driver.Fill(COLOR_BLACK);
-    randomizeValues();
+    menu.Init(&driver, true);
+    menu.AddMenuItem("Delay", GeneralSubmenuCallback);
+    menu.AddMenuItem("Reverb", GeneralSubmenuCallback);
+    menu.AddMenuItem("Distortion", GeneralSubmenuCallback);
+    menu.SetMenuColors(COLOR_WHITE, COLOR_WHITE, COLOR_DARK_BLUE, COLOR_WHITE, COLOR_LIGHT_GRAY);
 
     hw.StartAudio(AudioCallback);
 
     for(;;)
     {
         sw.Debounce();
+        sw2.Debounce();
         // IsRender() checks if DMA is idle (i.e. done transmitting the buffer), Update() initiates the DMA transfer
         if(driver.IsRender())
         {   
@@ -104,11 +78,17 @@ int main(void)
         }
 
         if (sw.RisingEdge()) {
-            randomizeValues();
             myLedVal = !myLedVal;
             lfoFreqIdx = (lfoFreqIdx + 1) % 7;
             lfo.SetFreq(lfoFreqs[lfoFreqIdx]);
-            buttonColor = myLedVal ? COLOR_CYAN : COLOR_LIGHT_GREEN;
+            menu.IncrementMenuCursor();
+        }
+        if (sw2.RisingEdge()) {
+            if (menu.IsMenuItemSelected()) {
+                menu.ReturnToMenuScreen();
+            } else {
+                menu.SelectCurrentMenuItem();
+            }
         }
         if (myLedVal) {
             hw.SetLed(true);

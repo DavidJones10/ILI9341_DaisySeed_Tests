@@ -15,7 +15,7 @@ public:
     SubmenuCallback submenuCallback;
     MenuItem(): submenuCallback(nullptr){}
 
-    void Init(ILI9341UiDriver* driver_, char* label_){
+    void Init(ILI9341UiDriver* driver_, const char* label_){
         driver = static_cast<ILI9341UiDriver*>(driver_);
         label = label_;
     }
@@ -37,7 +37,7 @@ public:
     void SetSubmenuCallback(SubmenuCallback func) {
         submenuCallback = func;
     } 
-    char* label;
+    const char* label;
 private:
     ILI9341UiDriver* driver;
 };
@@ -61,9 +61,11 @@ public:
         secondaryBorderColor = secondaryBorderColor_;
         secondaryFillColor = secondaryFillColor_;
     }
-    void AddMenuItem(char* label, void* UICallback) {
+    void AddMenuItem(const char* label, SubmenuCallback UICallback) {
         MenuItem item;
         item.Init(driver, label);
+        item.SetSubmenuCallback(UICallback);
+        menuItems.push_back(item);
     }
     void SelectCurrentMenuItem(){
         drawSubmenu = true;
@@ -71,8 +73,8 @@ public:
     void ReturnToMenuScreen(){
         drawSubmenu = false;
     }
-    char* GetMenuItemSelected(){
-        char* selected = menuItems[menuCursorIdx].label;
+    const char* GetMenuItemSelected(){
+        const char* selected = menuItems[menuCursorIdx].label;
         if (selected != nullptr) {
             return selected;
         } else {
