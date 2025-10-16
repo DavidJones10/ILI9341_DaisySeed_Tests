@@ -1,5 +1,5 @@
 #pragma once
-
+#include <math.h>
 #include "ui_driver.hpp"
 
 using namespace daisy;
@@ -328,6 +328,33 @@ class ILI9341UiDriver : public _UiDriver
             }
         }
     }
+    void DrawDial(uint16_t x, 
+                  uint16_t y, 
+                  uint16_t r, 
+                  float radAsFloat, 
+                  uint8_t borderColor,
+                  uint8_t fillColor,
+                  bool displayVal=false, 
+                  float valToDisplay = 0.f,
+                  const char* valLabel = "")
+    {
+        FillCircle(x, y, r, fillColor);
+        DrawCircle(x, y, r, borderColor);
+        float angle = (5.0f * M_PI / 4.0f) - (radAsFloat * (3.0f * M_PI / 2.0f));
+        
+        int lineX = x + (int)(cosf(angle) * (r - 2));
+        int lineY = y + (int)(sinf(angle) * (r - 2));
+        
+        // Draw the dial line
+        DrawLine(x, y, lineX, lineY, borderColor);
+
+        if (displayVal) {
+            char stbuff[30];
+            sprintf(stbuff, "%.2f", valToDisplay);
+            WriteStringAligned(stbuff, Font_11x18, Rectangle(x - r, y + r + 2, r * 2, 20), daisy::Alignment::centered, borderColor);
+            WriteStringAligned(valLabel, Font_11x18, Rectangle( - r, y - r -  22, r * 2, 20), daisy::Alignment::centered, borderColor);
+        }
+    }
     // Draws a rounded rectangle
     void DrawRoundedRectangle(uint16_t x,
                               uint16_t y,
@@ -343,8 +370,8 @@ class ILI9341UiDriver : public _UiDriver
         if (r * 2 > w) r = w / 2;
         if (r * 2 > h) r = h / 2;
 
-        DrawHLine(x + r, w - 2*r, color, alpha); // top
-        DrawHLine(x + r, y + h - 1, color, alpha); // bottom
+        DrawHLine(x + r, y,  w - 2*r, color, alpha); // top
+        DrawHLine(x + r, y + h,  w - 2*r, color, alpha); // bottom
         DrawVLine(x, y + r, h  - 2*r, color, alpha); // left
         DrawVLine(x + w - 1, y + r, h - 2*r, color, alpha); // right
 
@@ -367,7 +394,7 @@ class ILI9341UiDriver : public _UiDriver
         }
         if (r * 2 > w) r = w / 2;
         if (r * 2 > h) r = h / 2;
-        dma2d_.FillRect(Rectangle(x + r, y, w - 2*r, h), color, alpha); // Center rectangle
+        dma2d_.FillRect(Rectangle(x + r, y+1, w - 2*r, h-2), color, alpha); // Center rectangle
         dma2d_.FillRect(Rectangle(x, y + r, r, h - 2*r), color, alpha); // Left rectangle
         dma2d_.FillRect(Rectangle(x + w - r - 1, y + r, r, h - 2*r), color, alpha); // Right rectangle
         FillCircle(x + r, y + r, r, color); // Top Left
@@ -388,6 +415,7 @@ class ILI9341UiDriver : public _UiDriver
                              FontDef font)
     {   
         FillRoundedRectangle(x, y, w, h, r, fillColor);
+        DrawRoundedRectangle(x, y, w, h, r, borderColor);
         // Calculate text width and height
         uint16_t text_width = GetStringWidth(text, font);
         uint16_t text_height = font.FontHeight;

@@ -27,7 +27,7 @@ public:
                   uint8_t fillColor,
                   uint8_t textColor)
     {
-        driver->DrawRoundedTextRect(label, x, y, w, h, 5, borderColor, fillColor, textColor, Font_7x10);
+        driver->DrawRoundedTextRect(label, x, y, w, h, 5, borderColor, fillColor, textColor, Font_11x18);
     }
     void DrawSubmenu(){
         if (submenuCallback) {
@@ -106,12 +106,16 @@ public:
         }
     }
     void Draw() {
-        size_t writeX = 10, writeY = 10;
+        size_t writeX = 10, writeY = 40;
 
         if (drawSubmenu) {
             menuItems[menuCursorIdx].DrawSubmenu();
         } else {
             for (size_t i = 0; i < menuItems.size(); i++) {
+                if (writeY + itemHeight >= 240) {
+                    writeY = 40;
+                    writeX += itemWidth + itemGap;
+                }
                 uint8_t borderColor = (i == menuCursorIdx) ? secondaryBorderColor : primaryBorderColor;
                 uint8_t fillColor = (i == menuCursorIdx) ? secondaryFillColor : primaryFillColor;
                 menuItems[i].DrawItem(writeX, writeY, itemWidth, itemHeight, borderColor, fillColor, textColor);

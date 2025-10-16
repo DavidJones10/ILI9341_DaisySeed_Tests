@@ -39,6 +39,7 @@ void GeneralSubmenuCallback() {
     driver.DrawCircle(50, 50, 10, COLOR_BLUE);
     driver.DrawCircle(80, 50, 10, COLOR_RED);
     driver.DrawCircle(50, 80, 10, COLOR_WHITE);
+    driver.DrawDial(100, 100, 50, .0f, COLOR_WHITE, COLOR_BLUE, true, .0f, "label");
 }
 
 int main(void)
@@ -62,6 +63,13 @@ int main(void)
     menu.AddMenuItem("Delay", GeneralSubmenuCallback);
     menu.AddMenuItem("Reverb", GeneralSubmenuCallback);
     menu.AddMenuItem("Distortion", GeneralSubmenuCallback);
+    menu.AddMenuItem("Chorus", GeneralSubmenuCallback);
+    menu.AddMenuItem("Tremolo", GeneralSubmenuCallback);
+    menu.AddMenuItem("Phaser", GeneralSubmenuCallback);
+    menu.AddMenuItem("Wah", GeneralSubmenuCallback);
+    menu.AddMenuItem("Equaliser", GeneralSubmenuCallback);
+    menu.AddMenuItem("Looper", GeneralSubmenuCallback);
+    menu.AddMenuItem("Effects Chain", GeneralSubmenuCallback);
     menu.SetMenuColors(COLOR_WHITE, COLOR_WHITE, COLOR_DARK_BLUE, COLOR_WHITE, COLOR_LIGHT_GRAY);
 
     hw.StartAudio(AudioCallback);
@@ -93,7 +101,7 @@ int main(void)
                 menu.SelectCurrentMenuItem();
             } 
         }
-        if (enc.TimeHeldMs() > 2000.f) {
+        if (enc.TimeHeldMs() > 1200.f) {
             menu.ReturnToMenuScreen();
         }
         if (myLedVal) {
