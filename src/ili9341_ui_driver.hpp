@@ -352,7 +352,7 @@ class ILI9341UiDriver : public _UiDriver
             char stbuff[30];
             sprintf(stbuff, "%.2f", valToDisplay);
             WriteStringAligned(stbuff, Font_11x18, Rectangle(x - r, y + r + 2, r * 2, 20), daisy::Alignment::centered, borderColor);
-            WriteStringAligned(valLabel, Font_11x18, Rectangle( - r, y - r -  22, r * 2, 20), daisy::Alignment::centered, borderColor);
+            WriteStringAligned(valLabel, Font_11x18, Rectangle(x - r, y - r -  22, r * 2, 20), daisy::Alignment::centered, borderColor);
         }
     }
     // Draws a rounded rectangle
