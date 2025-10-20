@@ -36,10 +36,10 @@ void draw() {
 
 
 void GeneralSubmenuCallback() {
-    driver.DrawCircle(50, 50, 10, COLOR_BLUE);
-    driver.DrawCircle(80, 50, 10, COLOR_RED);
-    driver.DrawCircle(50, 80, 10, COLOR_WHITE);
-    driver.DrawDial(100, 100, 50, .0f, COLOR_WHITE, COLOR_BLUE, true, .0f, "label");
+    driver.DrawDial(50, 70, 35, .5f, COLOR_WHITE, COLOR_BLUE, true, .5f, "label");
+    driver.DrawDial(170, 70, 35, 1.f,COLOR_WHITE, COLOR_BLUE, true, 1.0f, "label");
+    driver.DrawDial(50, 180, 35, .0f,COLOR_WHITE, COLOR_BLUE, true, .0f, "label");
+    driver.DrawDial(170, 180, 35, .3f,COLOR_WHITE, COLOR_BLUE, true, .3f, "label");
 }
 
 int main(void)

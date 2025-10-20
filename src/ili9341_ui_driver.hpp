@@ -6,7 +6,7 @@ using namespace daisy;
 
 #include "ili9341_transport.hpp"
 #include "dma2d.hpp"
-
+#define MY_PI 3.14159265
 /**
  * A driver implementation for the ILI9341
  */
@@ -340,10 +340,10 @@ class ILI9341UiDriver : public _UiDriver
     {
         FillCircle(x, y, r, fillColor);
         DrawCircle(x, y, r, borderColor);
-        float angle = (5.0f * M_PI / 4.0f) - (radAsFloat * (3.0f * M_PI / 2.0f));
+        float angle = (5.0f * MY_PI / 4.0f) - (radAsFloat * (3.0f * MY_PI / 2.0f));
         
-        int lineX = x + (int)(cosf(angle) * (r - 2));
-        int lineY = y + (int)(sinf(angle) * (r - 2));
+        int lineX = x + (int)(cosf(angle) * (r - 1));
+        int lineY = y - (int)(sinf(angle) * (r - 1));
         
         // Draw the dial line
         DrawLine(x, y, lineX, lineY, borderColor);

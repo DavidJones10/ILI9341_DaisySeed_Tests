@@ -36,10 +36,28 @@ public:
     }
     void SetSubmenuCallback(SubmenuCallback func) {
         submenuCallback = func;
-    } 
-    const char* label;
+    }
+    const char* GetLabel() {
+        return label;
+    }
+    void AddSubmenuControl(const char* name, float minValue, float maxValue, float initial, float step) {
+        SubmenuControl newControl;
+        newControl.Init(name, minValue, maxValue, initial, step);
+        controls.push_back(newControl);
+    }
+    void IncrementControlIndex() {
+        uint8_t newIdx = ctlIdx + 1 % controls.size();
+    }
+    void DecrementControlIndex() {
+        uint8_t newIdx = ctlIdx - 1;
+        ctlIdx = (newIdx < 0) ? controls.size() - 1 : newIdx;
+    }
+
 private:
+    const char* label;
     ILI9341UiDriver* driver;
+    uint8_t ctlIdx;
+    std::vector<SubmenuControl> controls;
 };
 
 class Menu {
@@ -74,7 +92,7 @@ public:
         drawSubmenu = false;
     }
     const char* GetMenuItemSelected(){
-        const char* selected = menuItems[menuCursorIdx].label;
+        const char* selected = menuItems[menuCursorIdx].GetLabel();
         if (selected != nullptr) {
             return selected;
         } else {
@@ -131,4 +149,32 @@ private:
     bool wrapIncDec;
     std::vector<MenuItem> menuItems;
     uint16_t itemWidth = 150, itemHeight = 30, itemGap = 10;
+};
+
+class SubmenuControl {
+    public:
+        void Init(const char* name, float minValue, float maxValue, float initial, float step) {
+            label = name;
+            minVal = minValue;
+            maxVal = maxValue;
+            stepVal = step;
+            value = initial;
+        }
+        float GetDisplayValue(float floatVal) {
+            return minVal + (floatVal * maxVal);
+        }
+        void IncrementValue() {
+            float newVal = value + stepVal;
+            value = (newVal >= maxVal) ? maxVal : newVal;
+        }
+        void DecrementValue() {
+            float newVal = value - stepVal;
+            value = (newVal <= minVal) ? minVal : newVal;
+        }
+        float GetValue() {
+            return value;
+        }
+    private:
+        const char* label;
+        float minVal, maxVal, stepVal, value;
 };
