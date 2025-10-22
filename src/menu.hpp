@@ -8,7 +8,42 @@
 #define MIN_XY 0
 
 class MenuItem;
+class SubmenuControl;
 typedef std::function<void()> SubmenuCallback;
+
+class SubmenuControl {
+    public:
+        void Init(const char* name, float minValue, float maxValue, float initial, float step) {
+            label = name;
+            minVal = minValue;
+            maxVal = maxValue;
+            range = maxVal - minVal;
+            stepVal = step / range;
+            if (initial < minVal) initial = minVal;
+            if (initial > maxVal) initial = maxVal;
+            value = (initial - minVal) / range;
+        }
+        float GetDisplayValue() {
+            return minVal + (value * range);
+        }
+        void IncrementValue() {
+            float newVal = value + stepVal;
+            value = (newVal >= 1.f) ? 1.f : newVal;
+        }
+        void DecrementValue() {
+            float newVal = value - stepVal;
+            value = (newVal <= 0.f) ? 0.f : newVal;
+        }
+        float GetValue() {
+            return value;
+        }
+        const char* GetLabel() {
+            return label;
+        }
+    private:
+        const char* label;
+        float minVal, maxVal, range, stepVal, value;
+};
 
 class MenuItem {
 public:
@@ -18,6 +53,7 @@ public:
     void Init(ILI9341UiDriver* driver_, const char* label_){
         driver = static_cast<ILI9341UiDriver*>(driver_);
         label = label_;
+        ctlIdx = 0;
     }
     void DrawItem(uint16_t x, 
                   uint16_t y,
@@ -46,17 +82,47 @@ public:
         controls.push_back(newControl);
     }
     void IncrementControlIndex() {
-        uint8_t newIdx = ctlIdx + 1 % controls.size();
+        ctlIdx = ctlIdx + 1 % controls.size();
     }
     void DecrementControlIndex() {
         uint8_t newIdx = ctlIdx - 1;
         ctlIdx = (newIdx < 0) ? controls.size() - 1 : newIdx;
+    }
+    void SelectCurrentControl(){
+        ctlSelected = true;
+    }
+    void DeselectCurrentControl() {
+        ctlSelected = false;
+    }
+    bool IsControlSelected() {
+        return ctlSelected;
+    }
+    void IncrementControl() {
+        controls[ctlIdx].IncrementValue();
+    }
+    void DecrementControl() {
+        controls[ctlIdx].DecrementValue();
+    }
+    uint8_t GetControlIndex() {
+        return ctlIdx;
+    }
+    // Returns a pointer to the vector of Controls
+    SubmenuControl* GetControlVec() {
+        return controls.data();
+    }
+    SubmenuControl* GetControl(uint8_t idx) {
+        if (idx < this->GetNumControls())
+            return &controls[idx];
+    }
+    uint8_t GetNumControls() {
+        return controls.size();
     }
 
 private:
     const char* label;
     ILI9341UiDriver* driver;
     uint8_t ctlIdx;
+    bool ctlSelected;
     std::vector<SubmenuControl> controls;
 };
 
@@ -123,9 +189,9 @@ public:
             menuCursorIdx = (newCursorId < 0) ? 0 : newCursorId;
         }
     }
-    void Draw() {
+    void Draw(Encoder *enc) {
         size_t writeX = 10, writeY = 40;
-
+        
         if (drawSubmenu) {
             menuItems[menuCursorIdx].DrawSubmenu();
         } else {
@@ -141,6 +207,9 @@ public:
             }
         }
     }
+    MenuItem* GetMenuItems() {
+        return menuItems.data();
+    }
 private:
     ILI9341UiDriver* driver;
     uint8_t textColor, primaryBorderColor, primaryFillColor, secondaryBorderColor, secondaryFillColor;
@@ -149,32 +218,4 @@ private:
     bool wrapIncDec;
     std::vector<MenuItem> menuItems;
     uint16_t itemWidth = 150, itemHeight = 30, itemGap = 10;
-};
-
-class SubmenuControl {
-    public:
-        void Init(const char* name, float minValue, float maxValue, float initial, float step) {
-            label = name;
-            minVal = minValue;
-            maxVal = maxValue;
-            stepVal = step;
-            value = initial;
-        }
-        float GetDisplayValue(float floatVal) {
-            return minVal + (floatVal * maxVal);
-        }
-        void IncrementValue() {
-            float newVal = value + stepVal;
-            value = (newVal >= maxVal) ? maxVal : newVal;
-        }
-        void DecrementValue() {
-            float newVal = value - stepVal;
-            value = (newVal <= minVal) ? minVal : newVal;
-        }
-        float GetValue() {
-            return value;
-        }
-    private:
-        const char* label;
-        float minVal, maxVal, stepVal, value;
 };
