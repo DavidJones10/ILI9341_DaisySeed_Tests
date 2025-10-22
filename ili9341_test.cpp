@@ -38,81 +38,101 @@ void draw() {
 void GeneralSubmenuCallback() {
     driver.Fill(COLOR_DARK_BLUE);
     uint8_t numControls = menu.GetMenuItems()[menu.GetMenuCursorIndex()].GetNumControls();
-    driver.FillRect(Rectangle(0, 0, MAX_X, 30), COLOR_BLACK);
-    driver.WriteStringAligned(menu.GetMenuItems()[menu.GetMenuCursorIndex()].GetLabel(), Font_16x26, Rectangle(0, 0, MAX_X, 30), daisy::Alignment::centered, COLOR_WHITE);
+    
+    // Header
+    driver.FillRect(Rectangle(0, 0, MAX_X, 30), COLOR_DARK_GRAY);
+    driver.DrawRect(Rectangle(0, 0, MAX_X, 30), COLOR_WHITE);
+    driver.WriteStringAligned(menu.GetMenuItems()[menu.GetMenuCursorIndex()].GetLabel(), 
+                            Font_16x26, 
+                            Rectangle(0, 0, MAX_X, 30), 
+                            daisy::Alignment::centered, 
+                            COLOR_WHITE);
 
+    // Adjust dial positions based on number of controls
     switch (numControls) {
-        case 1:
+        case 1: // Single centered dial
             dialGapY = 0;
             dialGapX = 0;
-            dialX = 160;
-            dialY = 135;
-            dialRad = 70;
+            dialX = 160;    // Center of screen
+            dialY = 135;    // Vertically centered
+            dialRad = 70;   // Large single dial
             break;
-        case 2:
-             dialGapY = 0;
-             dialGapX = 106;
-             dialX = 107;
-             dialY = 135;
-             dialRad = 51;
-            break;
-        case 3:
+            
+        case 2: // Two dials side by side
             dialGapY = 0;
-            dialGapX = 80;
-            dialX = 80;
+            dialGapX = 160; // Screen width / 2
+            dialX = 80;     // Quarter of screen width
             dialY = 135;
-            dialRad = 39;
+            dialRad = 60;
             break;
-        case 4:
-            dialGapY = 70;
-            dialGapX = 106;
-            dialX = 107;
-            dialY = 100;
-            dialRad = 30;
-            dialX2 = 107;
+            
+        case 3: // Three dials in a row
+            dialGapY = 0;
+            dialGapX = 107; // Screen width / 3
+            dialX = 53;     // Half of dialGapX
+            dialY = 135;
+            dialRad = 45;
             break;
-        case 5:
-            dialGapY = 70;
-            dialGapX = 80;
-            dialX = 80;
-            dialY = 100;
-            dialRad = 35;
-            dialX2 = 107;
+            
+        case 4: // 2x2 grid
+            dialGapY = 115; 
+            dialGapX = 160;   
+            dialX = 80;        
+            dialY = 70;        
+            dialRad = 35;      
+            dialX2 = 80;       
             break;
-        case 6:
-            dialGapY = 70;
-            dialGapX = 80;
-            dialX = 80;
-            dialY = 100;
-            dialRad = 30;
-            dialX2 = 107;
+            
+        case 5: // 3+2 arrangement
+            dialGapY = 95;
+            dialGapX = 107;
+            dialX = 53;
+            dialY = 85;
+            dialRad = 40;
+            dialX2 = 106;  
+            break;
+            
+        case 6: // 3x2 grid
+            dialGapY = 110;    
+            dialGapX = 107;    
+            dialX = 53;        
+            dialY = 70;        
+            dialRad = 35;      
+            dialX2 = 106; 
             break;
     }
+
+    // Draw the dials
     for (size_t i = 0; i < numControls; i++) {
+        // Multi-row layout
+        if (dialX + dialRad > MAX_X) {
+            dialX = dialX2;
+            dialY += dialGapY;
+            if (numControls == 5) {
+                dialGapX = 160;
+            }
+        }
         if (i == menu.GetMenuItems()[menu.GetMenuCursorIndex()].GetControlIndex()) {
             if (menu.GetMenuItems()[menu.GetMenuCursorIndex()].IsControlSelected()) {
-                driver.FillRoundedRectangle(dialX - dialRad - 2, dialY - dialRad - 22, dialRad * 2 + 4, dialRad * 2 + 42, 4, COLOR_LIGHT_GRAY);
+                driver.FillRoundedRectangle(dialX - dialRad - 2, 
+                                          dialY - dialRad - 22, 
+                                          dialRad * 2 + 4, 
+                                          dialRad * 2 + 42, 
+                                          4, 
+                                          COLOR_LIGHT_GRAY);
             }
-            driver.DrawRoundedRectangle(dialX - dialRad - 2, dialY - dialRad - 22, dialRad * 2 + 4, dialRad * 2 + 42, 4, COLOR_WHITE);
+            driver.DrawRoundedRectangle(dialX - dialRad - 2, 
+                                      dialY - dialRad - 22, 
+                                      dialRad * 2 + 4, 
+                                      dialRad * 2 + 42, 
+                                      4, 
+                                      COLOR_WHITE);
         }
+
         const char* label = menu.GetMenuItems()[menu.GetMenuCursorIndex()].GetControlVec()[i].GetLabel();
         float radAsFloat = menu.GetMenuItems()[menu.GetMenuCursorIndex()].GetControlVec()[i].GetValue();
         float displayValue = menu.GetMenuItems()[menu.GetMenuCursorIndex()].GetControlVec()[i].GetDisplayValue();
-        if (dialGapY == 0) {
-            driver.DrawDial(dialX, dialY, dialRad, radAsFloat, COLOR_WHITE, COLOR_BLUE, true, displayValue, label);
-        } else {
-            if (i > 2) {
-                dialY += dialGapY;
-                dialX = dialX2;
-                if (numControls == 5) {
-                    dialGapX = 106;
-                }
-                driver.DrawDial(dialX, dialY, dialRad, radAsFloat, COLOR_WHITE, COLOR_BLUE, true, displayValue, label);
-                dialGapY = 0;
-            } else {
-                driver.DrawDial(dialX, dialY, dialRad, radAsFloat, COLOR_WHITE, COLOR_BLUE, true, displayValue, label);
-            }
-        }
+        driver.DrawDial(dialX, dialY, dialRad, radAsFloat, COLOR_WHITE, COLOR_BLUE, true, displayValue, label);
         dialX += dialGapX;
     }
 }
@@ -120,7 +140,7 @@ void GeneralSubmenuCallback() {
 void InitMenuItems(Menu &menu) {
     // Delay
     menu.AddMenuItem("Delay", GeneralSubmenuCallback);
-    menu.GetMenuItems()[0].AddSubmenuControl("Dry/Wet", 0.f, 1.f, .5f, .01f);
+    menu.GetMenuItems()[0].AddSubmenuControl("Mix", 0.f, 1.f, .5f, .01f);
     menu.GetMenuItems()[0].AddSubmenuControl("Time", 0.f, 1000.f, 100.f, 5.f);
     menu.GetMenuItems()[0].AddSubmenuControl("Feedback", 0.f, .99f, .5f, .01f);
     
@@ -140,8 +160,8 @@ void InitMenuItems(Menu &menu) {
     // Chorus
     menu.AddMenuItem("Chorus", GeneralSubmenuCallback);
     menu.GetMenuItems()[3].AddSubmenuControl("Mix", 0.f, 1.f, .5f, .01f);
-    menu.GetMenuItems()[3].AddSubmenuControl("Rate", 0.1f, 10.f, 1.f, .1f);
-    menu.GetMenuItems()[3].AddSubmenuControl("Depth", 0.f, 1.f, .5f, .01f);
+    menu.GetMenuItems()[3].AddSubmenuControl("Rate", 0.1f, 10.f, 1.f, .1f, [](float value) { lfo.SetFreq(value); });
+    menu.GetMenuItems()[3].AddSubmenuControl("Depth", 0.f, 1.f, .5f, .01f, [](float value) { lfo.SetAmp(value); });
     menu.GetMenuItems()[3].AddSubmenuControl("Feedback", 0.f, .99f, .2f, .01f);
 
     // Tremolo
@@ -241,12 +261,10 @@ int main(void)
                      menu.GetMenuItems()[menu.GetMenuCursorIndex()].DecrementControl();
                  }
              }
-            if (!menu.GetMenuItems()[menu.GetMenuCursorIndex()].IsControlSelected()) {
-                if (enc.TimeHeldMs() > 1200.f) {
+        }
+        if (enc.TimeHeldMs() > 1200.f) {
                     menu.ReturnToMenuScreen();
                 }
-            }
-        }
 
         if (sw.RisingEdge()) {
             lfoFreqIdx = (lfoFreqIdx + 1) % 7;

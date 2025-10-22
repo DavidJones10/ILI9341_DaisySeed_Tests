@@ -342,8 +342,23 @@ class ILI9341UiDriver : public _UiDriver
         DrawCircle(x, y, r, borderColor);
         float angle = (5.0f * MY_PI / 4.0f) - (radAsFloat * (3.0f * MY_PI / 2.0f));
         
-        int lineX = x + (int)(cosf(angle) * (r - 1));
-        int lineY = y - (int)(sinf(angle) * (r - 1));
+        int lineX, lineY;
+        if (fabs(angle - MY_PI) < 0.001f) {
+            lineX = x - (r - 1);
+            lineY = y;
+        }
+        else if (fabs(angle - MY_PI/2) < 0.001f) {
+            lineX = x;
+            lineY = y - (r - 1);
+        }
+        else if (fabs(angle) < 0.001f || fabs(angle - 2*MY_PI) < 0.001f) {
+            lineX = x + (r - 1);
+            lineY = y;
+        }
+        else {
+            lineX = x + (int)(cosf(angle) * (r - 1));
+            lineY = y - (int)(sinf(angle) * (r - 1));
+        }
         
         // Draw the dial line
         DrawLine(x, y, lineX, lineY, borderColor);

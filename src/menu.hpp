@@ -10,10 +10,11 @@
 class MenuItem;
 class SubmenuControl;
 typedef std::function<void()> SubmenuCallback;
+typedef std::function<void(float)> ControlCallback;
 
 class SubmenuControl {
     public:
-        void Init(const char* name, float minValue, float maxValue, float initial, float step) {
+        void Init(const char* name, float minValue, float maxValue, float initial, float step, ControlCallback cb_) {
             label = name;
             minVal = minValue;
             maxVal = maxValue;
@@ -22,6 +23,7 @@ class SubmenuControl {
             if (initial < minVal) initial = minVal;
             if (initial > maxVal) initial = maxVal;
             value = (initial - minVal) / range;
+            cb = cb_;
         }
         float GetDisplayValue() {
             return minVal + (value * range);
@@ -29,10 +31,12 @@ class SubmenuControl {
         void IncrementValue() {
             float newVal = value + stepVal;
             value = (newVal >= 1.f) ? 1.f : newVal;
+            if (cb != nullptr) cb(this->GetDisplayValue());
         }
         void DecrementValue() {
             float newVal = value - stepVal;
             value = (newVal <= 0.f) ? 0.f : newVal;
+             if (cb != nullptr) cb(this->GetDisplayValue());
         }
         float GetValue() {
             return value;
@@ -43,6 +47,7 @@ class SubmenuControl {
     private:
         const char* label;
         float minVal, maxVal, range, stepVal, value;
+        ControlCallback cb;
 };
 
 class MenuItem {
@@ -76,17 +81,20 @@ public:
     const char* GetLabel() {
         return label;
     }
-    void AddSubmenuControl(const char* name, float minValue, float maxValue, float initial, float step) {
+    void AddSubmenuControl(const char* name, float minValue, float maxValue, float initial, float step, ControlCallback cb = nullptr){
         SubmenuControl newControl;
-        newControl.Init(name, minValue, maxValue, initial, step);
+        newControl.Init(name, minValue, maxValue, initial, step, cb);
         controls.push_back(newControl);
     }
     void IncrementControlIndex() {
-        ctlIdx = ctlIdx + 1 % controls.size();
+        ctlIdx = (ctlIdx + 1) % controls.size();
     }
     void DecrementControlIndex() {
-        uint8_t newIdx = ctlIdx - 1;
-        ctlIdx = (newIdx < 0) ? controls.size() - 1 : newIdx;
+        if (ctlIdx == 0) {
+        ctlIdx = controls.size() - 1;  // Wrap to last index
+        } else {
+            ctlIdx--;
+        }
     }
     void SelectCurrentControl(){
         ctlSelected = true;
@@ -175,18 +183,22 @@ public:
         if (wrapIncDec) {
             menuCursorIdx = (menuCursorIdx + 1) % menuItems.size();
         } else {
-            menuCursorIdx += 1;
-            if (menuCursorIdx > menuItems.size()) {
-                menuCursorIdx = menuItems.size() - 1;
+            if (menuCursorIdx < menuItems.size() - 1) {  // Fix: Check proper bounds
+                menuCursorIdx++;
             }
         }
     }
     void DecrementMenuCursor(){
-        size_t newCursorId = menuCursorIdx - 1;
         if (wrapIncDec) {
-            menuCursorIdx = (newCursorId < 0) ? menuItems.size() - 2 : newCursorId;
+            if (menuCursorIdx == 0) {
+                menuCursorIdx = menuItems.size() - 1;  // Wrap to last index
+            } else {
+                menuCursorIdx--;
+            }
         } else {
-            menuCursorIdx = (newCursorId < 0) ? 0 : newCursorId;
+            if (menuCursorIdx > 0) {
+                menuCursorIdx--;
+            }
         }
     }
     void Draw(Encoder *enc) {
