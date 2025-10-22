@@ -343,31 +343,26 @@ class ILI9341UiDriver : public _UiDriver
         float angle = (5.0f * MY_PI / 4.0f) - (radAsFloat * (3.0f * MY_PI / 2.0f));
         
         int lineX, lineY;
-        if (fabs(angle - MY_PI) < 0.001f) {
-            lineX = x - (r - 1);
-            lineY = y;
+        if (fabs(angle - MY_PI) < 0.02f) {
+            DrawHLine(x - r + 1, y, r - 1, borderColor);
         }
         else if (fabs(angle - MY_PI/2) < 0.001f) {
-            lineX = x;
-            lineY = y - (r - 1);
+            DrawVLine(x, y - r + 1, r - 1, borderColor);
         }
         else if (fabs(angle) < 0.001f || fabs(angle - 2*MY_PI) < 0.001f) {
-            lineX = x + (r - 1);
-            lineY = y;
+            DrawHLine(x, y, r - 1, borderColor);
         }
         else {
             lineX = x + (int)(cosf(angle) * (r - 1));
             lineY = y - (int)(sinf(angle) * (r - 1));
+            DrawLine(x, y, lineX, lineY, borderColor);
         }
-        
-        // Draw the dial line
-        DrawLine(x, y, lineX, lineY, borderColor);
 
         if (displayVal) {
             char stbuff[30];
             sprintf(stbuff, "%.2f", valToDisplay);
-            WriteStringAligned(stbuff, Font_11x18, Rectangle(x - r, y + r + 2, r * 2, 20), daisy::Alignment::centered, borderColor);
-            WriteStringAligned(valLabel, Font_11x18, Rectangle(x - r, y - r -  22, r * 2, 20), daisy::Alignment::centered, borderColor);
+            WriteStringAligned(valLabel, Font_11x18, Rectangle(x - r, y - r -  20, r * 2, 21), daisy::Alignment::centered, borderColor);
+            DrawRoundedTextRect(stbuff, x - r, y + r + 2, r * 2, 16, 3, COLOR_LIGHT_GRAY, COLOR_DARK_BLUE, COLOR_WHITE, Font_7x10);
         }
     }
     // Draws a rounded rectangle

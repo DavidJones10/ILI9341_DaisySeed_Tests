@@ -75,11 +75,11 @@ void GeneralSubmenuCallback() {
             break;
             
         case 4: // 2x2 grid
-            dialGapY = 115; 
+            dialGapY = 102; 
             dialGapX = 160;   
             dialX = 80;        
-            dialY = 70;        
-            dialRad = 35;      
+            dialY = 85;        
+            dialRad = 30;      
             dialX2 = 80;       
             break;
             

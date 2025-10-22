@@ -202,14 +202,14 @@ public:
         }
     }
     void Draw(Encoder *enc) {
-        size_t writeX = 10, writeY = 40;
+        size_t writeX = 5, writeY = 45;
         
         if (drawSubmenu) {
             menuItems[menuCursorIdx].DrawSubmenu();
         } else {
             for (size_t i = 0; i < menuItems.size(); i++) {
                 if (writeY + itemHeight >= 240) {
-                    writeY = 40;
+                    writeY = 45;
                     writeX += itemWidth + itemGap;
                 }
                 uint8_t borderColor = (i == menuCursorIdx) ? secondaryBorderColor : primaryBorderColor;
